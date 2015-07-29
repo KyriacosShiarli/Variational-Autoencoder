@@ -44,7 +44,7 @@ t = np.linspace(0, 2, 4001)
 
 #x_train = np.array([numpy.sin(t*100), numpy.sin(t*200), numpy.sin(t*40), numpy.sin(t*50)])*.5
 
-n_steps = 2000
+n_steps = 400
 
 dimZ = 4
 HU_decoder = 200
@@ -87,46 +87,53 @@ for j in xrange(n_steps):
     print("Iteration %d, lower bound = %.2f,"
           " time = %.2fs"
           % (j, encoder.lowerbound/N, end - begin))
-    # if j%10 == 0:
 
-    #     mu_out3 = encoder.getTestOutput(data)
-    #     for i, (d, mu) in enumerate(zip(data, mu_out3.T)):
 
-    #         plt.subplot(3,2,i+1)
-    #         plt.cla()
-    #         plt.plot(d)
-    #         plt.plot(mu)
+    if j%100 == 0:
 
-    #     plt.subplot(3,2,5)
-    #     plt.imshow(encoder.params[0], interpolation = 'nearest', cmap = 'gray')
-    #     plt.subplot(3,2,6)
-    #     plt.imshow(encoder.params[1], interpolation = 'nearest', cmap = 'gray')
+        mu_out3 = encoder.getTestOutput(data)
+        for i, (d, mu) in enumerate(zip(data, mu_out3.T)):
 
-    #     plt.draw()
+            plt.subplot(3,2,i+1)
+            plt.cla()
+            plt.plot(d[:200])
+            plt.plot(mu[:200])
+
+        plt.subplot(3,2,5)
+        plt.imshow(encoder.params[0], interpolation = 'nearest', cmap = 'gray')
+        plt.subplot(3,2,6)
+        plt.imshow(encoder.params[1], interpolation = 'nearest', cmap = 'gray')
+
+        plt.draw()
 
     
     #mu_out = encoder.getTestOutput(test_point)
     begin = end
     #print mu_out.shape
 
-test_point = np.random.normal(0,1,(1,data.shape[1]))
-print test_point
+test_point = np.array([data[0,:]])
 #mu_out = encoder.getTestOutput(test_point)
 #print mu_out
+z_val = np.array([[1,2,3,4]]).T
+mu_out = encoder.generateOutput(z_val,test_point)
+zed = encoder.getZ(data)
 while True:
     z_val = raw_input("Input value for Z")
-    mu_out = encoder.generateOutput(float(z_val),test_point)
-    
+    mu_out = encoder.generateOutput(eval(z_val),test_point)
+    print "The zeds are:",zed,mu_out.shape    
     
     
     mu_out2 = encoder.getTestOutput(test_point)
 
     mu_out3 = encoder.getTestOutput(data)
+    
 
     for i, (d, mu) in enumerate(zip(data, mu_out3.T)):
-        plt.subplot(2,2,i+1)
+        plt.subplot(2,3,i+1)
+        plt.cla()
         plt.plot(d[:200])
         plt.plot(mu[:200])
+        
     plt.show()
 
     # plt.plot(data.T, 'b')
@@ -141,9 +148,11 @@ while True:
     scipy.io.wavfile.write("test"+z_val+".wav", 2000, mu_out)
 
     scipy.io.wavfile.write("test_"+z_val+".wav", 2000, mu_out2)
-    scipy.io.wavfile.write("test_noise"+z_val+".wav", 2000, test_point[0])
-    plt.plot(mu_out2[:200])
-    plt.show
+    scipy.io.wavfile.write("test_datapoint"+z_val+".wav", 2000, test_point[0])
+
+    plt.subplot(2,3,5)
+    plt.cla()
+    plt.plot(mu_out[:200])
 
 #scipy.io.wavfile.write("test2", 2000, test_point[0])
     #if j % 5 == 0:

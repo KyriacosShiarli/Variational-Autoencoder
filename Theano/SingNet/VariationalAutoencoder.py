@@ -66,7 +66,7 @@ class VA:
         W1,W2,W3,W4,W5,W6,x,eps = T.dmatrices("W1","W2","W3","W4","W5","W6","x","eps")
         #Create biases as cols so they can be broadcasted for minibatches
         b1,b2,b3,b4,b5,b6 = T.dcols("b1","b2","b3","b4","b5","b6")
-        z1 = T.scalar("z1")
+        z1 = T.col("z1")
         if self.continuous:
             # h_encoder = T.nnet.softplus(T.dot(W1,x) + b1)
             h_encoder = T.dot(W1,x) + b1
@@ -94,7 +94,7 @@ class VA:
             h_dec = T.dot(W4,z1) + b4
 
             mu_decoder = T.tanh(T.dot(W5,h_decoder) + b5)
-            mu_dec = T.tanh(T.dot(W5,h_decoder) + b5)
+            mu_dec = T.tanh(T.dot(W5,h_dec) + b5)
             log_sigma_decoder = 0.5*(T.dot(W6,h_decoder) + b6)
             logpxz = T.sum(-(0.5 * np.log(2 * np.pi) + log_sigma_decoder) - 0.5 * ((x - mu_decoder) / T.exp(log_sigma_decoder))**2)
             gradvariables = [W1,W2,W3,W4,W5,W6,b1,b2,b3,b4,b5,b6]
@@ -110,11 +110,12 @@ class VA:
 
         #Add the lowerbound so we can keep track of results
         derivatives.append(logp)
+        
+        self.get_z = th.function(gradvariables+[x,eps],z,on_unused_input='ignore')
         self.generate = th.function(gradvariables+[z1,x,eps],mu_dec,on_unused_input='ignore')
         self.predict = th.function(gradvariables+[x,eps],mu_decoder,on_unused_input='ignore')
         self.gradientfunction = th.function(gradvariables + [x,eps], derivatives, on_unused_input='ignore')
         self.lowerboundfunction = th.function(gradvariables + [x,eps], logp, on_unused_input='ignore')
-
 
     def iterate(self, data):
        	"""Main method, slices data in minibatches and performs an iteration"""
@@ -167,10 +168,11 @@ class VA:
     def getTestOutput(self,data_point):
         e = np.random.normal(0,1,[self.dimZ,data_point.shape[0]])
         return self.predict(*(self.params),x=data_point.T,eps=e)
+    def getZ(self,data_point):
+        e = np.random.normal(0,1,[self.dimZ,data_point.shape[0]])
+        return self.get_z(*(self.params),x=data_point.T,eps=e)
     def generateOutput(self,z_input,data_point):
         e = np.random.normal(0,1,[self.dimZ,data_point.shape[0]])
-        print "shape",e.shape
-        print data_point.shape
         return self.generate(*(self.params),z1=z_input,x=data_point.T,eps = e)
     def updateParams(self,totalGradients,N,current_batch_size):
     	"""Update the parameters, taking into account AdaGrad and a prior"""
