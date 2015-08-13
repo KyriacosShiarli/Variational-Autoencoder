@@ -21,6 +21,7 @@ from pydub import AudioSegment
 from preprocess import pickle_loader,pickle_saver,map_to_range
 import matplotlib.pyplot as plt
 import numpy
+from sn_plot import plot_reconstructed
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-d","--double", help="Train on hidden layer of previously trained AE - specify params", default = False)
@@ -34,6 +35,7 @@ f = gzip.open('mnist.pkl.gz', 'r')
 (x_train, t_train), (x_valid, t_valid), (x_test, t_test)  = cPickle.load(f)
 f.close()
 
+#TOFO: Make all input convensions N*D
 #x_train = pickle_loader("sound/test_data.pkl")
 x_train = pickle_loader("sound/puretone_data.pkl")
 
@@ -78,7 +80,11 @@ lowerbound = np.array([])
 testlowerbound = np.array([])
 
 begin = time.time()
+
+# Declare figures for interactive mode
 plt.ion()
+f1 = plt.figure(1)
+
 for j in xrange(n_steps):
     encoder.lowerbound = 0
     print 'Iteration:', j
@@ -88,25 +94,9 @@ for j in xrange(n_steps):
           " time = %.2fs"
           % (j, encoder.lowerbound/N, end - begin))
 
-
     if j%100 == 0:
-
         mu_out3 = encoder.getTestOutput(data)
-        for i, (d, mu) in enumerate(zip(data, mu_out3.T)):
-
-            plt.subplot(3,2,i+1)
-            plt.cla()
-            plt.plot(d[:200])
-            plt.plot(mu[:200])
-
-        plt.subplot(3,2,5)
-        plt.imshow(encoder.params[0], interpolation = 'nearest', cmap = 'gray')
-        plt.subplot(3,2,6)
-        plt.imshow(encoder.params[1], interpolation = 'nearest', cmap = 'gray')
-
-        plt.draw()
-
-    
+        plot_reconstructed(data,mu_out3.T,f1,interactive=True)
     #mu_out = encoder.getTestOutput(test_point)
     begin = end
     #print mu_out.shape
