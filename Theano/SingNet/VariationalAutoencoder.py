@@ -153,8 +153,6 @@ class VA:
             e = np.random.normal(0,1,[self.dimZ,miniBatch.shape[0]])
             lowerbound += self.lowerboundfunction(*(self.params),x=miniBatch.T,eps=e)
         return lowerbound/N
-
-
     def getGradients(self,miniBatch):
     	"""Compute the gradients for one minibatch and check if these do not contain NaNs"""
         totalGradients = [0] * len(self.params)
@@ -170,10 +168,21 @@ class VA:
         return self.predict(*(self.params),x=data_point.T,eps=e)
     def getZ(self,data_point):
         e = np.random.normal(0,1,[self.dimZ,data_point.shape[0]])
-        return self.get_z(*(self.params),x=data_point.T,eps=e)
+        if data_point.shape[0]==self.dimX:
+            return self.get_z(*(self.params),x=data_point,eps=e)
+        elif data_point.shape[1]==self.dimX:
+            return self.get_z(*(self.params),x=data_point.T,eps=e)
     def generateOutput(self,z_input,data_point):
         e = np.random.normal(0,1,[self.dimZ,data_point.shape[0]])
-        return self.generate(*(self.params),z1=z_input,x=data_point.T,eps = e)
+        if z_input.shape[0]==self.dimZ and z_input.shape[1]!=self.dimZ:
+            return self.generate(*(self.params),z1=z_input.T,x=data_point.T,eps = e)
+        if z_input.shape[1]==self.dimZ and z_input.shape[0]!=self.dimZ:
+            return self.generate(*(self.params),z1=z_input,x=data_point.T,eps = e)
+        elif z_input.shape[1]==self.dimZ and z_input.shape[0] == self.dimZ:
+            print "input shapes are the same. Using columns as value for Z"
+            return self.generate(*(self.params),z1=z_input.T,x=data_point.T,eps = e)
+        else: 
+            print "invalid Input Dimentions"
     def updateParams(self,totalGradients,N,current_batch_size):
     	"""Update the parameters, taking into account AdaGrad and a prior"""
         for i in xrange(len(self.params)):

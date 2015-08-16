@@ -104,7 +104,7 @@ for j in xrange(n_steps):
 test_point = np.array([data[0,:]])
 #mu_out = encoder.getTestOutput(test_point)
 #print mu_out
-z_val = np.array([[1,2,3,4]]).T
+z_val = np.array([[1,2,3,4]])
 mu_out = encoder.generateOutput(z_val,test_point)
 zed = encoder.getZ(data)
 while True:
