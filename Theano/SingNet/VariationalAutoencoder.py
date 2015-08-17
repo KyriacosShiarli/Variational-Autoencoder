@@ -2,7 +2,7 @@
 Joost van Amersfoort - <joost.van.amersfoort@gmail.com>
 Otto Fabius - <ottofabius@gmail.com
 
-License: MIT
+License: MIT - TEST
 """
 
 import numpy as np
