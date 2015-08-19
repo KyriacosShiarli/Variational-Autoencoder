@@ -46,7 +46,7 @@ t = np.linspace(0, 2, 4001)
 
 #x_train = np.array([numpy.sin(t*100), numpy.sin(t*200), numpy.sin(t*40), numpy.sin(t*50)])*.5
 
-n_steps = 400
+n_steps = 10
 
 dimZ = 4
 HU_decoder = 200
