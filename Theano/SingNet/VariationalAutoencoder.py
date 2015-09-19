@@ -175,9 +175,9 @@ class VA:
     def generateOutput(self,z_input,data_point):
         e = np.random.normal(0,1,[self.dimZ,data_point.shape[0]])
         if z_input.shape[0]==self.dimZ and z_input.shape[1]!=self.dimZ:
-            return self.generate(*(self.params),z1=z_input.T,x=data_point.T,eps = e)
-        if z_input.shape[1]==self.dimZ and z_input.shape[0]!=self.dimZ:
             return self.generate(*(self.params),z1=z_input,x=data_point.T,eps = e)
+        if z_input.shape[1]==self.dimZ and z_input.shape[0]!=self.dimZ:
+            return self.generate(*(self.params),z1=z_input.T,x=data_point.T,eps = e)
         elif z_input.shape[1]==self.dimZ and z_input.shape[0] == self.dimZ:
             print "input shapes are the same. Using columns as value for Z"
             return self.generate(*(self.params),z1=z_input.T,x=data_point.T,eps = e)
