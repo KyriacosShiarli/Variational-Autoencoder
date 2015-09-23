@@ -21,6 +21,27 @@ def map_to_range(data,input_range,output_range,from_data = False):
 	data_temp = np.copy(data)*grad
 	return data_temp+intercept
 
+def map_to_range_symmetric(data,input_range,output_range,from_data = False):
+	# this function maps from one symmetric range to another.
+	# e.g. -1,1 to -32768,32768. useful for playback
+	if from_data==True:
+		input_range =(np.amin(data),np.amax(data),)
+	data = map(float,data)
+	grad = (np.amax(output_range)-np.amin(output_range))/(np.amax(input_range)-np.amin(input_range))
+	data_temp = np.copy(data)*grad
+	return data_temp
+
+def load_and_split(directory,duration):
+	rate,all_data= scipy.io.wavfile.read(directory+".wav")
+	sample_length =rate*duration
+	out_data = map_to_range_symmetric(all_data[:,0],[-32767. ,32767. ],[-1,1])
+	num_datapoints = np.floor(out_data.shape[0]/sample_length)
+	rem = np.floor(out_data.shape[0]%sample_length)
+	out_data = np.reshape(out_data[:-rem],(num_datapoints,sample_length))
+	data={"data":out_data,"sample rate":rate}
+	pickle_saver(data,directory+".pkl")
+
+
 def load_pure_tone_data():
 
 	rate,data= scipy.io.wavfile.read("sound/toy_data_single_note/A.wav")
@@ -34,23 +55,4 @@ def load_pure_tone_data():
 	pickle_saver(all_data,"sound/puretone_data.pkl")
 
 if __name__ == "__main__":
-	def bright_shinies():
-		rate,data= scipy.io.wavfile.read("sound/brightshinies_sample.wav")
-		print "MAX OF DATA", data.dtype
-		#scipy.io.wavfile.write("reversal",44100,data)
-		test = map_to_range(data[:,0],[-32767. ,32767. ],[-1,1])
-
-		reverse = map_to_range(data[:,0],[-1,1],[-32767. ,32767. ])
-		reverse = np.array(reverse,dtype = np.int16)
-		#scipy.io.wavfile.write("reversal",44100,reverse)
-		#fivefold subsampling 
-		sample_length =20000
-		num_datapoints = np.floor(test.shape[0]/sample_length)
-		#print dat.shape
-		rem = np.floor(test.shape[0]%sample_length)
-		all_data = np.reshape(test[:-rem],(num_datapoints,sample_length))
-		pickle_saver(all_data,"sound/test_data.pkl")
-		scipy.io.wavfile.write("reversal",44100,all_data[0,:])
-	load_pure_tone_data()
-	data = pickle_loader("sound/puretone_data.pkl")
-	print data.shape
+	load_and_split("sound/mistakidis",0.5)
