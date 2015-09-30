@@ -3,13 +3,13 @@ import mido
 import pygame
 from VariationalAutoencoder import VA
 import numpy as np
+import theano
 
 def play_from_encoder(directory):
     encoder = pickle_loader(directory + ".pkl")
-    encoder.sample_rate = 44100
     sample_rate = encoder.sample_rate
-    buffer_size = 20 # sample buffer for playback. Hevent really determined what i does qualitatively. Probably affects latency
-    play_duration = 2000 # play duration in miliseconds
+    buffer_size = 10 # sample buffer for playback. Hevent really determined what i does qualitatively. Probably affects latency
+    play_duration = 100 # play duration in miliseconds
     pygame.mixer.pre_init(sample_rate, -16, 2,buffer = buffer_size) # 44.1kHz, 16-bit signed, stereo
     pygame.init()
     volLeft = 0.5;volRight=0.5 # Volume
@@ -35,10 +35,9 @@ def play_from_encoder_no_midi(directory):
     # when no midi device is plugged in this function will play random
     # latent variable instances to inspect the capabilities of the network
     encoder = pickle_loader(directory + ".pkl")
-    encoder.sample_rate = 44100
     sample_rate = encoder.sample_rate
-    buffer_size = 1000
-    play_duration = 2000 # play duration in miliseconds
+    buffer_size = 20
+    play_duration = 100 # play duration in miliseconds
     pygame.mixer.pre_init(sample_rate, -16, 2,buffer = buffer_size) # 44.1kHz, 16-bit signed, stereo
     pygame.init()
     volLeft = 0.5;volRight=0.5 # Volume
@@ -58,6 +57,8 @@ def play_from_encoder_no_midi(directory):
 
 
 if __name__ == "__main__":
+    theano.config.floatX="float32"
+    print theano.config.floatX
     play_from_encoder("models/encoder")
 
 

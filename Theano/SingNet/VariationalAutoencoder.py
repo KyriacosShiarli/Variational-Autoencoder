@@ -68,7 +68,10 @@ class VA:
         b1,b2,b3,b4,b5,b6 = T.dcols("b1","b2","b3","b4","b5","b6")
         z1 = T.col("z1")
         if self.continuous:
-            h_encoder = T.nnet.softplus(T.dot(W1,x) + b1)
+            #convolve x
+            # no_filters = 100, stride = 4, filter_size = 50
+
+            h_encoder = T.tanh(T.dot(W1,x) + b1)
             #h_encoder = T.dot(W1,x) + b1
         else:   
             h_encoder = T.tanh(T.dot(W1,x) + b1)
@@ -173,9 +176,10 @@ class VA:
         elif data_point.shape[1]==self.dimX:
             return self.get_z(*(self.params),x=data_point.T,eps=e)
     def generateOutput(self,z_input):
-        data_point = np.zeros([1,self.dimX])
+        data_point = np.zeros([1,self.dimX],dtype = "float32")
         e = np.random.normal(0,1,[self.dimZ,data_point.shape[0]])
-        
+        e = e.astype(np.float32)
+        z_input  = z_input.astype(np.float32)
         if z_input.shape[0]==self.dimZ and z_input.shape[1]!=self.dimZ:
             return self.generate(*(self.params),z1=z_input,x=data_point.T,eps = e)
         if z_input.shape[1]==self.dimZ and z_input.shape[0]!=self.dimZ:
